@@ -1,4 +1,4 @@
-FROM golang:1.13.3-alpine
+FROM golang:1.13.2-stretch
 
 
 RUN apt-get install bzr git jq
