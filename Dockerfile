@@ -9,6 +9,8 @@ RUN git clone https://github.com/filecoin-project/lotus.git &&\
     make &&\
     make install
 
+WORKDIR /lotus
+
 CMD ["/bin/bash"]
 
 
