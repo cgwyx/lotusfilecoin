@@ -1,12 +1,15 @@
 FROM golang:1.13.2-stretch
 
 
-RUN apt-get -y update &&\
-    apt-get -y install bzr pkg-config gcc git jq
+RUN apt -y update &&\
+    apt -y install mesa-opencl-icd ocl-icd-opencl-dev &&\
+    add-apt-repository ppa:longsleep/golang-backports &&\
+    apt -y update &&\
+    apt -y install gcc git bzr jq pkg-config mesa-opencl-icd ocl-icd-opencl-dev
 
 RUN git clone https://github.com/filecoin-project/lotus.git &&\
     cd lotus &&\
-    make &&\
+    make clean all &&\
     make install
 
 WORKDIR /lotus
