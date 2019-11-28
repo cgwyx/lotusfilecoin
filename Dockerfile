@@ -2,7 +2,7 @@ FROM golang:1.13.2-stretch
 
 
 RUN apt -y update &&\
-    apt -y install python-software-properties  software-properties-common &&\
+    apt -y install software-properties-common &&\
     apt -y update &&\
     apt -y install mesa-opencl-icd ocl-icd-opencl-dev &&\
     add-apt-repository ppa:longsleep/golang-backports &&\
