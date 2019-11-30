@@ -1,11 +1,8 @@
-FROM debian:stretch
+FROM archlinux:latest
 
 
-RUN apt -y update &&\
-    apt -y install mesa-opencl-icd ocl-icd-opencl-dev &&\
-    add-apt-repository ppa:longsleep/golang-backports &&\
-    apt -y update &&\
-    apt -y install golang-go gcc git bzr jq pkg-config mesa-opencl-icd ocl-icd-opencl-dev
+RUN pacman -Syu opencl-icd-loader &&\
+    pacman -Syu go gcc git bzr jq pkg-config opencl-icd-loader opencl-headers
 
 RUN git clone https://github.com/filecoin-project/lotus.git &&\
     cd lotus &&\
