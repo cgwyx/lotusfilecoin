@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM debian:stretch
 
 
 RUN apt -y update &&\
