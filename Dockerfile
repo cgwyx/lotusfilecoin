@@ -13,7 +13,7 @@ VOLUME ["/home","/root","/var"]
 WORKDIR /lotus
 
 #CMD ["/bin/sh"]
-CMD [ "/bin/sh", "-c", "lotus daemon >> /home/lotus.log" ]
+CMD [ "/bin/sh", "-c", "lotus daemon >> /home/lotus.log &" ]
 
 
 
