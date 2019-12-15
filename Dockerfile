@@ -8,11 +8,14 @@ RUN git clone https://github.com/filecoin-project/lotus.git &&\
     make clean all &&\
     make install
 
-VOLUME /home
+VOLUME ["/home","/root","/var"]
 
 WORKDIR /lotus
 
-CMD ["lotus daemon >> /home/lotus.log"]
+#CMD ["/bin/sh"]
+#CMD [ "/bin/sh", "-c", "lotus daemon >> /home/lotus.log" ]
+CMD [ "lotus daemon >> /home/lotus.log" ]
+
 
 
 
