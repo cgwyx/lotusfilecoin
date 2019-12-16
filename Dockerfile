@@ -14,7 +14,7 @@ WORKDIR /lotus
 
 #CMD ["/bin/sh"]
 #CMD [ "/bin/sh", "-c", "lotus daemon >> /home/lotus.log &" ]
-CMD [ "lotus daemon",">>","/home/lotus.log","&" ]
+CMD [ "./lotus daemon",">>","/home/lotus.log","&" ]
 
 
 
