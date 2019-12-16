@@ -6,14 +6,15 @@ RUN pacman -Syu --noconfirm opencl-icd-loader &&\
 RUN git clone https://github.com/filecoin-project/lotus.git &&\
     cd lotus &&\
     make clean all &&\
-    make install
+    make install &&\
+    make pond
 
 VOLUME ["/home","/root","/var"]
 
 WORKDIR /lotus
 
-#CMD ["/bin/sh"]
-CMD [ "/bin/sh", "-c", "lotus daemon >> /home/lotus.log &" ]
+CMD ["/bin/sh"]
+#CMD [ "/bin/sh", "-c", "lotus daemon >> /home/lotus.log &" ]
 
 
 
