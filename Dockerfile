@@ -6,7 +6,7 @@ RUN pacman -Syu --noconfirm opencl-icd-loader &&\
 RUN git clone https://github.com/filecoin-project/lotus.git &&\
     cd lotus &&\
     make clean all &&\
-    make install &&\
+    make install
 
 VOLUME ["/home","/root","/var"]
 
