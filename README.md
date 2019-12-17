@@ -1,3 +1,4 @@
 # lotusfilecoin
 lotus filecoin  
-docker run -it --name filecoin-lotus -v ~/lotus/init:/root/ -v ~/lotus/proof:/var/tmp/ --entrypoint=/bin/sh cgwyx/lotusfilecoin:latest
+docker run -d --restart=always --name lotusdocker -v ~:/home/ -v ~/lotus/init:/root/ -v ~/lotusproofsdata:/var/tmp/filecoin-proof-parameters cgwyx/lotusfilecoin:latest
+
