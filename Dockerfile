@@ -10,6 +10,9 @@ RUN git clone https://github.com/filecoin-project/lotus.git &&\
 
 VOLUME ["/home","/root","/var"]
 
+EXPOSE 1235/tcp
+EXPOSE 8080/tcp
+
 WORKDIR /lotus
 
 CMD ["./lotus","daemon"]
