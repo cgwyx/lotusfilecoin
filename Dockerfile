@@ -13,6 +13,8 @@ VOLUME ["/home","/root","/var"]
 EXPOSE 1235/tcp
 EXPOSE 8080/tcp
 
+ENV IPFS_GATEWAY=https://proof-parameters.s3.cn-south-1.jdcloud-oss.com/ipfs/
+
 WORKDIR /lotus
 
 CMD ["./lotus","daemon"]
