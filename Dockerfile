@@ -12,6 +12,8 @@ VOLUME ["/home","/root","/var"]
 
 EXPOSE 1234
 
+EXPOSE 1235
+
 EXPOSE 1347
 
 EXPOSE 5678
