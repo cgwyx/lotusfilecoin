@@ -22,6 +22,8 @@ ENV IPFS_GATEWAY=https://proof-parameters.s3.cn-south-1.jdcloud-oss.com/ipfs/
 
 WORKDIR /lotus
 
+#ENTRYPOINT ["./lotus", "daemon", "&"]
+
 CMD ["./lotus", "daemon", "&"]
 #CMD ["/bin/sh"]
 #CMD [ "/bin/sh", "-c", "lotus daemon >> /home/lotus.log &" ]
