@@ -17,6 +17,7 @@ EXPOSE 1234/tcp
 # P2P port
 EXPOSE 1235/tcp
 
+# API port
 EXPOSE 2345
 
 ENV IPFS_GATEWAY=https://proof-parameters.s3.cn-south-1.jdcloud-oss.com/ipfs/
