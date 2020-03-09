@@ -8,6 +8,8 @@ RUN git clone https://github.com/filecoin-project/lotus.git &&\
     make clean all &&\
     make install
 
+RUN make build bench
+
 VOLUME ["/home","/root","/var"]
 
 
@@ -18,7 +20,7 @@ EXPOSE 1234/tcp
 EXPOSE 1235/tcp
 
 # API port
-EXPOSE 2345
+EXPOSE 2345/tcp
 
 ENV IPFS_GATEWAY=https://proof-parameters.s3.cn-south-1.jdcloud-oss.com/ipfs/
 
