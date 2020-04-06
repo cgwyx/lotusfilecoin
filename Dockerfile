@@ -16,7 +16,7 @@ VOLUME ["/home","/root","/var"]
 EXPOSE 1234/tcp
 
 # P2P port
-EXPOSE 1235/tcp
+EXPOSE 1347/tcp
 
 # API port
 EXPOSE 2345/tcp
