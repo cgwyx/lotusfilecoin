@@ -4,7 +4,7 @@ FROM golang:1.14.7-buster AS build-env
 
 # branch or tag of the lotus version to build
 #ARG BRANCH=interopnet
-ARG BRANCH=v0.8.1
+ARG BRANCH=master
 
 #RUN echo "Building lotus from branch $BRANCH"
 ########
