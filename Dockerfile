@@ -15,7 +15,7 @@ ARG BRANCH=master
 
 ########
 RUN apt-get update -y && \
-    apt-get install gcc git bzr jq pkg-config mesa-opencl-icd ocl-icd-opencl-dev llvm clang opencl-headers wget -y
+    apt-get install gcc git bzr jq pkg-config mesa-opencl-icd ocl-icd-opencl-dev clang opencl-headers wget -y
 RUN go env -w GOPROXY=https://goproxy.cn
 RUN curl -sSf https://sh.rustup.rs | sh -s -- -y
 RUN echo "export PATH=~/.cargo/bin:$PATH" >> ~/.bashrc
