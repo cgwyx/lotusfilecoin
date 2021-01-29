@@ -31,7 +31,8 @@ RUN git clone -b $BRANCH https://github.com/filecoin-project/lotus.git &&\
 
 
 # runtime container stage
-FROM nvidia/opencl:devel-ubuntu18.04
+FROM nvidia/opencl:runtime-ubuntu16.04
+#FROM nvidia/opencl:devel-ubuntu18.04
 #FROM nvidia/opencl:runtime-ubuntu18.04
 #FROM nvidia/cudagl:10.2-devel-ubuntu18.04
 #FROM apicciau/opencl_ubuntu:latest
