@@ -23,9 +23,12 @@ RUN wget "https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rust
 FROM builder-deps AS builder-local
 MAINTAINER Lotus Development Team
 
-COPY ./ /opt/filecoin
-WORKDIR /opt/filecoin
-RUN make clean deps
+#COPY ./ /opt/filecoin
+WORKDIR /opt
+RUN git clone -b $BRANCH https://github.com/filestar-project/lotus.git --recursive && \
+    mv lotus filecoin && \
+    cd filecoin && \
+    make clean deps
 
 
 FROM builder-local AS builder
