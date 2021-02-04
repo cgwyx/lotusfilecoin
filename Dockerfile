@@ -3,9 +3,6 @@ MAINTAINER Lotus Development Team
 
 RUN apt-get update && apt-get install -y ca-certificates build-essential clang ocl-icd-opencl-dev ocl-icd-libopencl1 jq libhwloc-dev
 
-
-#ARG BRANCH=master
-ARG BRANCH=v1.4.1
 ARG RUST_VERSION=nightly
 ENV XDG_CACHE_HOME="/tmp"
 
@@ -25,6 +22,9 @@ RUN wget "https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rust
 
 FROM builder-deps AS builder-local
 MAINTAINER Lotus Development Team
+
+#ARG BRANCH=master
+ARG BRANCH=v1.4.1
 
 #COPY ./ /opt/filecoin
 WORKDIR /opt
