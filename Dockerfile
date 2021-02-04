@@ -1,11 +1,12 @@
 # build container stage
-#FROM golang:latest AS build-env
+FROM golang:latest AS build-env
 #FROM golang:1.15.6-buster AS build-env
-FROM golang:1.15.5-buster AS build-env
+#FROM golang:1.15.5-buster AS build-env
 
 # branch or tag of the lotus version to build
+ARG BRANCH=v1.5.0-pre3
 #ARG BRANCH=interopnet
-ARG BRANCH=master
+#ARG BRANCH=master
 
 #RUN echo "Building lotus from branch $BRANCH"
 ########
