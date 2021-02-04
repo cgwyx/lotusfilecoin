@@ -3,6 +3,8 @@ MAINTAINER Lotus Development Team
 
 RUN apt-get update && apt-get install -y ca-certificates build-essential clang ocl-icd-opencl-dev ocl-icd-libopencl1 jq libhwloc-dev
 
+
+#ARG BRANCH=master
 ARG BRANCH=v1.4.1
 ARG RUST_VERSION=nightly
 ENV XDG_CACHE_HOME="/tmp"
@@ -26,7 +28,7 @@ MAINTAINER Lotus Development Team
 
 #COPY ./ /opt/filecoin
 WORKDIR /opt
-RUN git clone -b $BRANCH https://github.com/filestar-project/lotus.git --recursive && \
+RUN git clone --recursive -b $BRANCH https://github.com/filecoin-project/lotus.git && \
     mv lotus filecoin && \
     cd filecoin && \
     make clean deps
