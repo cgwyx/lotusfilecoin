@@ -2,7 +2,7 @@
 FROM golang:latest AS build-env
 #FROM golang:1.15.6-buster AS build-env
 #FROM golang:1.15.5-buster AS build-env
-
+WORKDIR /root
 # branch or tag of the lotus version to build
 ARG BRANCH=v1.5.0-pre3
 #ARG BRANCH=interopnet
@@ -15,11 +15,14 @@ ARG BRANCH=v1.5.0-pre3
 ########
 
 ########
-RUN apt-get update -y && \
-    apt-get install gcc git bzr jq pkg-config mesa-opencl-icd ocl-icd-opencl-dev clang opencl-headers wget -y
-RUN go env -w GOPROXY=https://goproxy.cn
-RUN curl -sSf https://sh.rustup.rs | sh -s -- -y
-RUN echo "export PATH=~/.cargo/bin:$PATH" >> ~/.bashrc
+RUN  apt-get update && \
+     apt-get install mesa-opencl-icd ocl-icd-opencl-dev gcc git bzr jq pkg-config curl libclang-dev -y && \
+     apt-get upgrade
+    
+RUN curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain stable -y
+
+ENV PATH=/root/.cargo/bin:$PATH
+
 #######
 
 WORKDIR /
