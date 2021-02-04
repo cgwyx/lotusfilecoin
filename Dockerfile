@@ -3,6 +3,7 @@ MAINTAINER Lotus Development Team
 
 RUN apt-get update && apt-get install -y ca-certificates build-essential clang ocl-icd-opencl-dev ocl-icd-libopencl1 jq libhwloc-dev
 
+ARG BRANCH=v1.4.1
 ARG RUST_VERSION=nightly
 ENV XDG_CACHE_HOME="/tmp"
 
