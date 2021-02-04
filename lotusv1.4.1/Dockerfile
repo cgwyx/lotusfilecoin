@@ -23,8 +23,8 @@ RUN wget "https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rust
 FROM builder-deps AS builder-local
 MAINTAINER Lotus Development Team
 
-ARG BRANCH=master
-#ARG BRANCH=v1.4.1
+#ARG BRANCH=master
+ARG BRANCH=v1.4.1
 
 #COPY ./ /opt/filecoin
 WORKDIR /opt
