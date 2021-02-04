@@ -1,102 +1,77 @@
-# build container stage
-FROM golang:latest AS build-env
-#FROM golang:1.15.6-buster AS build-env
-#FROM golang:1.15.5-buster AS build-env
-WORKDIR /root
-# branch or tag of the lotus version to build
-ARG BRANCH=v1.5.0-pre3
-#ARG BRANCH=interopnet
-#ARG BRANCH=master
+FROM golang:1.15.6 AS builder-deps
+MAINTAINER Lotus Development Team
 
-#RUN echo "Building lotus from branch $BRANCH"
-########
-#RUN apt-get update -y && \
-#    apt-get install sudo curl git mesa-opencl-icd ocl-icd-opencl-dev gcc git bzr jq pkg-config -y
-########
+RUN apt-get update && apt-get install -y ca-certificates build-essential clang ocl-icd-opencl-dev ocl-icd-libopencl1 jq libhwloc-dev
 
-########
-RUN  apt-get update && \
-     apt-get install mesa-opencl-icd ocl-icd-opencl-dev gcc git bzr jq pkg-config curl libclang-dev -y && \
-     apt-get upgrade
-    
-RUN curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain stable -y
+ARG RUST_VERSION=nightly
+ENV XDG_CACHE_HOME="/tmp"
 
-ENV PATH=/root/.cargo/bin:$PATH
+ENV RUSTUP_HOME=/usr/local/rustup \
+    CARGO_HOME=/usr/local/cargo \
+    PATH=/usr/local/cargo/bin:$PATH
 
-#######
-
-WORKDIR /
-
-RUN git clone -b $BRANCH https://github.com/filecoin-project/lotus.git &&\
-    cd lotus &&\
-    make clean &&\
-    make all &&\
-    make install
+RUN wget "https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rustup-init"; \
+    chmod +x rustup-init; \
+    ./rustup-init -y --no-modify-path --profile minimal --default-toolchain $RUST_VERSION; \
+    rm rustup-init; \
+    chmod -R a+w $RUSTUP_HOME $CARGO_HOME; \
+    rustup --version; \
+    cargo --version; \
+    rustc --version;
 
 
-# runtime container stage
-FROM nvidia/opencl:runtime-ubuntu16.04
-#FROM nvidia/opencl:devel-ubuntu18.04
-#FROM nvidia/opencl:runtime-ubuntu18.04
-#FROM nvidia/cudagl:10.2-devel-ubuntu18.04
-#FROM apicciau/opencl_ubuntu:latest
+FROM builder-deps AS builder-local
+MAINTAINER Lotus Development Team
 
-# Instead of running apt-get just copy the certs and binaries that keeps the runtime image nice and small
-#RUN apt-get update -y && \
-    #apt-get install sudo ca-certificates mesa-opencl-icd ocl-icd-opencl-dev clinfo -y && \
-    #rm -rf /var/lib/apt/lists/*
-RUN apt-get update -y && \
-    apt-get install clinfo -y
-    
-COPY --from=build-env /lotus /lotus
-COPY --from=build-env /etc/ssl/certs /etc/ssl/certs
-#COPY LOTUS_VERSION /VERSION
-
-COPY --from=build-env /lib/x86_64-linux-gnu/libdl.so.2 /lib/libdl.so.2
-COPY --from=build-env /lib/x86_64-linux-gnu/libutil.so.1 /lib/libutil.so.1 
-COPY --from=build-env /usr/lib/x86_64-linux-gnu/libOpenCL.so.1.0.0 /lib/libOpenCL.so.1
-COPY --from=build-env /lib/x86_64-linux-gnu/librt.so.1 /lib/librt.so.1
-COPY --from=build-env /lib/x86_64-linux-gnu/libgcc_s.so.1 /lib/libgcc_s.so.1
-
-#COPY config/config.toml /root/config.toml
-#COPY scripts/entrypoint /bin/entrypoint
-
-RUN ln -s /lotus/lotus /usr/bin/lotus && \
-    ln -s /lotus/lotus-miner /usr/bin/lotus-miner && \
-    ln -s /lotus/lotus-worker /usr/bin/lotus-worker
-
-VOLUME ["/root","/var"]
+COPY ./ /opt/filecoin
+WORKDIR /opt/filecoin
+RUN make clean deps
 
 
-# API port
-EXPOSE 1234/tcp
+FROM builder-local AS builder
+MAINTAINER Lotus Development Team
 
-# API port
-EXPOSE 2345/tcp
+WORKDIR /opt/filecoin
 
-# API port
-EXPOSE 3456/tcp
+ARG RUSTFLAGS=""
+ARG GOFLAGS=""
 
-# P2P port
-EXPOSE 1347/tcp
-
-# ipfs port
-EXPOSE 4567/tcp
+RUN make deps lotus lotus-miner lotus-worker lotus-shed lotus-chainwatch lotus-stats
 
 
-ENV IPFS_GATEWAY=https://proof-parameters.s3.cn-south-1.jdcloud-oss.com/ipfs/
+FROM ubuntu:20.04 AS base
+MAINTAINER Lotus Development Team
 
-ENV FIL_PROOFS_MAXIMIZE_CACHING=1
+# Base resources
+COPY --from=builder /etc/ssl/certs                           /etc/ssl/certs
+COPY --from=builder /lib/x86_64-linux-gnu/libdl.so.2         /lib/
+COPY --from=builder /lib/x86_64-linux-gnu/librt.so.1         /lib/
+COPY --from=builder /lib/x86_64-linux-gnu/libgcc_s.so.1      /lib/
+COPY --from=builder /lib/x86_64-linux-gnu/libutil.so.1       /lib/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libltdl.so.7   /lib/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libnuma.so.1   /lib/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libhwloc.so.5  /lib/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libOpenCL.so.1 /lib/
 
-ENV FIL_PROOFS_USE_GPU_COLUMN_BUILDER=1
-
-ENV FIL_PROOFS_USE_GPU_TREE_BUILDER=1
+RUN useradd -r -u 532 -U fc
 
 
-WORKDIR /lotus
+FROM base AS lotus
+MAINTAINER Lotus Development Team
 
+COPY --from=builder /opt/filecoin/lotus      /usr/local/bin/
+COPY --from=builder /opt/filecoin/lotus-shed /usr/local/bin/
+
+ENV FILECOIN_PARAMETER_CACHE /var/tmp/filecoin-proof-parameters
+ENV LOTUS_PATH /var/lib/lotus
+
+RUN mkdir /var/lib/lotus /var/tmp/filecoin-proof-parameters && chown fc /var/lib/lotus /var/tmp/filecoin-proof-parameters
+
+USER fc
+
+#ENTRYPOINT ["/usr/local/bin/lotus"]
+
+#CMD ["-help"]
 
 CMD ["lotus", "daemon", "&"]
-#ENTRYPOINT ["/bin/entrypoint"]
-#CMD ["-d"]
 
