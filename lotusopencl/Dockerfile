@@ -46,7 +46,7 @@ RUN make deps lotus lotus-miner lotus-worker lotus-shed lotus-chainwatch lotus-s
 
 
 #FROM ubuntu:20.04 AS base
-FROM nvidia/opencl:runtime-ubuntu18.04
+FROM nvidia/opencl:runtime-ubuntu18.04 AS base
 MAINTAINER Lotus Development Team
 
 # Base resources
