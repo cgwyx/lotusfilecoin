@@ -1,10 +1,11 @@
-FROM golang:1.15.6 AS builder-deps
-MAINTAINER Lotus Development Team
+FROM golang:1.15.6 AS builder
+#FROM golang:1.15.6 AS builder-deps
+MAINTAINER https://github.com/cgwyx/ https://hub.docker.com/u/cgwyx
 
 RUN apt-get update && apt-get install -y ca-certificates build-essential clang ocl-icd-opencl-dev ocl-icd-libopencl1 jq libhwloc-dev
 
 ARG RUST_VERSION=nightly
-ENV XDG_CACHE_HOME="/tmp"
+#ENV XDG_CACHE_HOME="/tmp"
 
 ENV RUSTUP_HOME=/usr/local/rustup \
     CARGO_HOME=/usr/local/cargo \
@@ -19,37 +20,25 @@ RUN wget "https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rust
     cargo --version; \
     rustc --version;
 
+WORKDIR /
 
-FROM builder-deps AS builder-local
-MAINTAINER Lotus Development Team
-
-#ARG BRANCH=master
 ARG BRANCH=v1.4.1
 
-#COPY ./ /opt/filecoin
-WORKDIR /opt
 RUN git clone --recursive -b $BRANCH https://github.com/filecoin-project/lotus.git && \
-    mv lotus filecoin && \
-    cd filecoin && \
-    make clean deps
+    cd lotus &&\
+    make clean &&\
+    make all &&\
+    make install
 
 
-FROM builder-local AS builder
-MAINTAINER Lotus Development Team
+FROM nvidia/opencl:devel-ubuntu18.04
+#FROM nvidia/opencl:runtime-ubuntu18.04
+#FROM nvidia/cudagl:10.2-devel-ubuntu18.04
+#FROM apicciau/opencl_ubuntu:latest
 
-WORKDIR /opt/filecoin
+RUN apt-get update -y && \
+    apt-get install clinfo -y
 
-ARG RUSTFLAGS=""
-ARG GOFLAGS=""
-
-RUN make deps lotus lotus-miner lotus-worker lotus-shed lotus-chainwatch lotus-stats
-
-
-#FROM ubuntu:20.04 AS base
-FROM nvidia/opencl:runtime-ubuntu18.04 AS base
-MAINTAINER Lotus Development Team
-
-# Base resources
 COPY --from=builder /etc/ssl/certs                           /etc/ssl/certs
 COPY --from=builder /lib/x86_64-linux-gnu/libdl.so.2         /lib/
 COPY --from=builder /lib/x86_64-linux-gnu/librt.so.1         /lib/
@@ -60,25 +49,41 @@ COPY --from=builder /usr/lib/x86_64-linux-gnu/libnuma.so.1   /lib/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libhwloc.so.5  /lib/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libOpenCL.so.1 /lib/
 
-RUN useradd -r -u 532 -U fc
+COPY --from=builder /lotus /lotus
+
+RUN ln -s /lotus/lotus /usr/bin/lotus && \
+    ln -s /lotus/lotus-miner /usr/bin/lotus-miner && \
+    ln -s /lotus/lotus-worker /usr/bin/lotus-worker
+
+#chmod u+x /lotus
+
+VOLUME ["/root","/var"]
 
 
-FROM base AS lotus
-MAINTAINER Lotus Development Team
+# API port
+EXPOSE 1234/tcp
 
-COPY --from=builder /opt/filecoin/lotus      /usr/local/bin/
-COPY --from=builder /opt/filecoin/lotus-shed /usr/local/bin/
+# API port
+EXPOSE 2345/tcp
 
-ENV FILECOIN_PARAMETER_CACHE /var/tmp/filecoin-proof-parameters
-ENV LOTUS_PATH /var/lib/lotus
+# API port
+EXPOSE 3456/tcp
 
-RUN mkdir /var/lib/lotus /var/tmp/filecoin-proof-parameters && chown fc /var/lib/lotus /var/tmp/filecoin-proof-parameters
+# P2P port
+EXPOSE 1347/tcp
 
-USER fc
 
-#ENTRYPOINT ["/usr/local/bin/lotus"]
+ENV IPFS_GATEWAY=https://proof-parameters.s3.cn-south-1.jdcloud-oss.com/ipfs/
 
-#CMD ["-help"]
+ENV FIL_PROOFS_MAXIMIZE_CACHING=1
+
+ENV FIL_PROOFS_USE_GPU_COLUMN_BUILDER=1
+
+ENV FIL_PROOFS_USE_GPU_TREE_BUILDER=1
+
+
+WORKDIR /lotus
+
 
 CMD ["lotus", "daemon", "&"]
 
