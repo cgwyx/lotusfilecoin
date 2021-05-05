@@ -24,7 +24,7 @@ FROM builder-deps AS builder-local
 MAINTAINER Lotus Development Team
 
 #ARG BRANCH=master
-ARG BRANCH=v1.4.1
+ARG BRANCH=v1.8.0
 
 #COPY ./ /opt/filecoin
 WORKDIR /opt
